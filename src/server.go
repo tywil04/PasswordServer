@@ -3,7 +3,7 @@ package main
 import (
 	"crypto/sha512"
 	"net/http"
-	"passwordserver/src/routes/api/v1/auth/signin"
+	"passwordserver/src/routes"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -18,7 +18,9 @@ func deriveKey(email string, masterPassword string, iterations int) []byte {
 }
 
 func handleRequests() {
-	http.HandleFunc("/", signin.Handler)
+	http.HandleFunc("/api/v1/auth/signin", routes.SigninHandler)
+	http.HandleFunc("/api/v1/auth/signup", routes.SignupHandler)
+
 	http.ListenAndServe(":8000", nil)
 }
 
