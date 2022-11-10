@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"passwordserver/src/lib"
 	"passwordserver/src/routes"
 )
 
@@ -13,5 +14,6 @@ func handleRequests() {
 }
 
 func main() {
+	go lib.DatabaseConnect()
 	handleRequests()
 }
