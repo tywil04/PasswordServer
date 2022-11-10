@@ -28,41 +28,34 @@ func SigninHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func SigninPost(response http.ResponseWriter, request *http.Request) {
-	response.Header().Set("Content-Type", "application/json")
-
 	signinParameters := SigninParameters{}
 	decoderError := json.NewDecoder(request.Body).Decode(&signinParameters)
 	if decoderError != nil {
-		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Unable to decode JSON body."})
+		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode JSON body."})
 		return
 	}
 
 	if signinParameters.MasterHash == "" {
-		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
+		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
 		return
 	}
 
 	if signinParameters.ProtectedDatabaseKey == "" {
-		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Required parameter 'ProtectedDatabaseKey' not provided."})
+		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'ProtectedDatabaseKey' not provided."})
 		return
 	}
 
 	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(signinParameters.MasterHash)
 	if dmhError != nil {
-		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
+		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
 		return
 	}
 
 	strengthenedMasterHashBytes, strengthenedMasterHashSalt := lib.StrengthenMasterHash(MasterHashBytes)
 	strengthenedMasterHash := base64.StdEncoding.EncodeToString(strengthenedMasterHashBytes) + ";" + base64.StdEncoding.EncodeToString(strengthenedMasterHashSalt)
 
-	fmt.Print(strengthenedMasterHash)
-	fmt.Print(signinParameters.ProtectedDatabaseKey)
+	fmt.Println(strengthenedMasterHash)
+	fmt.Println(signinParameters.ProtectedDatabaseKey)
 
-	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(SigninResponse{})
+	lib.JsonResponse(response, http.StatusOK, SigninResponse{})
 }
