@@ -3,7 +3,9 @@ package routes
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"passwordserver/src/lib"
 )
 
 type SigninParameters struct {
@@ -48,20 +50,18 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	decodedMasterHash, dmhError := base64.StdEncoding.DecodeString(signinParameters.MasterHash)
-	decodedProtectedDatabaseKey, dpdkError := base64.StdEncoding.DecodeString(signinParameters.ProtectedDatabaseKey)
-
+	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(signinParameters.MasterHash)
 	if dmhError != nil {
 		response.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
 		return
 	}
 
-	if dpdkError != nil {
-		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(SigninErrorResponse{Error: "Unable to decode base64 encoded parameter 'ProtectedDatabaseKey'."})
-		return
-	}
+	strengthenedMasterHashBytes, strengthenedMasterHashSalt := lib.StrengthenMasterHash(MasterHashBytes)
+	strengthenedMasterHash := base64.StdEncoding.EncodeToString(strengthenedMasterHashBytes) + ";" + base64.StdEncoding.EncodeToString(strengthenedMasterHashSalt)
+
+	fmt.Print(strengthenedMasterHash)
+	fmt.Print(signinParameters.ProtectedDatabaseKey)
 
 	response.WriteHeader(http.StatusOK)
 	json.NewEncoder(response).Encode(SigninResponse{})
