@@ -31,29 +31,29 @@ func SignupHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func SignupPost(response http.ResponseWriter, request *http.Request) {
-	SignupParameters := SignupParameters{}
-	decoderError := json.NewDecoder(request.Body).Decode(&SignupParameters)
+	signupParameters := SignupParameters{}
+	decoderError := json.NewDecoder(request.Body).Decode(&signupParameters)
 	if decoderError != nil {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode JSON body."})
 		return
 	}
 
-	if SignupParameters.Email == "" {
+	if signupParameters.Email == "" {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'Email' not provided."})
 		return
 	}
 
-	if SignupParameters.MasterHash == "" {
+	if signupParameters.MasterHash == "" {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
 		return
 	}
 
-	if SignupParameters.ProtectedDatabaseKey == "" {
+	if signupParameters.ProtectedDatabaseKey == "" {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'ProtectedDatabaseKey' not provided."})
 		return
 	}
 
-	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(SignupParameters.MasterHash)
+	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(signupParameters.MasterHash)
 	if dmhError != nil {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
 		return
@@ -61,11 +61,11 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 
 	strengthenedMasterHashSalt := lib.RandomBytes(16)
 	strengthenedMasterHashBytes := lib.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
-	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(SignupParameters.ProtectedDatabaseKey)
+	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(signupParameters.ProtectedDatabaseKey)
 
 	if lib.Database != nil {
 		newUser := lib.User{
-			Email:                SignupParameters.Email,
+			Email:                signupParameters.Email,
 			MasterHash:           strengthenedMasterHashBytes,
 			MasterHashSalt:       strengthenedMasterHashSalt,
 			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
