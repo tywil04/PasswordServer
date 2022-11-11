@@ -3,9 +3,10 @@ package routes
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"passwordserver/src/lib"
+
+	"github.com/google/uuid"
 )
 
 type SignupParameters struct {
@@ -14,6 +15,7 @@ type SignupParameters struct {
 }
 
 type SignupResponse struct {
+	UserId uuid.UUID
 }
 
 type SignupErrorResponse struct {
@@ -52,10 +54,18 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 	}
 
 	strengthenedMasterHashBytes, strengthenedMasterHashSalt := lib.StrengthenMasterHash(MasterHashBytes)
-	strengthenedMasterHash := base64.StdEncoding.EncodeToString(strengthenedMasterHashBytes) + ";" + base64.StdEncoding.EncodeToString(strengthenedMasterHashSalt)
+	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(SignupParameters.ProtectedDatabaseKey)
 
-	fmt.Println(strengthenedMasterHash)
-	fmt.Println(SignupParameters.ProtectedDatabaseKey)
-
-	lib.JsonResponse(response, http.StatusOK, SignupResponse{})
+	if lib.Database != nil {
+		newUser := lib.User{
+			MasterHash:           strengthenedMasterHashBytes,
+			MasterHashSalt:       strengthenedMasterHashSalt,
+			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
+		}
+		lib.Database.Create(&newUser)
+		lib.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
+	} else {
+		lib.JsonResponse(response, http.StatusInternalServerError, SignupErrorResponse{Error: "The server was unable to create a new user."})
+		return
+	}
 }
