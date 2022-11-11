@@ -75,9 +75,7 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 			database.Database.Create(&sessionToken)
 			user.SessionTokens = append(user.SessionTokens, sessionToken)
 
-			cookie := libcrypto.GenerateSessionCookie(*privateKey, sessionToken.Id, user.Id)
-
-			http.SetCookie(response, &cookie)
+			libcrypto.CreateSessionCookie(response, *privateKey, sessionToken.Id, user.Id)
 		}
 
 		lib.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
