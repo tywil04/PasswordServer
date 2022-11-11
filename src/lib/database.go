@@ -21,6 +21,7 @@ type Base struct {
 
 type User struct {
 	Base
+	Email                string       `gorm:"type:string"`
 	MasterHash           []byte       `gorm:"type:bytes"`
 	MasterHashSalt       []byte       `gorm:"type:bytes"`
 	ProtectedDatabaseKey []byte       `gorm:"type:bytes"`

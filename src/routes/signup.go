@@ -10,6 +10,7 @@ import (
 )
 
 type SignupParameters struct {
+	Email                string
 	MasterHash           string
 	ProtectedDatabaseKey string
 }
@@ -37,6 +38,11 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	if SignupParameters.Email == "" {
+		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'Email' not provided."})
+		return
+	}
+
 	if SignupParameters.MasterHash == "" {
 		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
 		return
@@ -53,11 +59,13 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	strengthenedMasterHashBytes, strengthenedMasterHashSalt := lib.StrengthenMasterHash(MasterHashBytes)
+	strengthenedMasterHashSalt := lib.RandomBytes(16)
+	strengthenedMasterHashBytes := lib.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
 	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(SignupParameters.ProtectedDatabaseKey)
 
 	if lib.Database != nil {
 		newUser := lib.User{
+			Email:                SignupParameters.Email,
 			MasterHash:           strengthenedMasterHashBytes,
 			MasterHashSalt:       strengthenedMasterHashSalt,
 			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
