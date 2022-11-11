@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"passwordserver/src/lib"
+	libcrypto "passwordserver/src/lib/crypto"
+	"passwordserver/src/lib/database"
 
 	"github.com/google/uuid"
 )
@@ -59,18 +61,18 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	strengthenedMasterHashSalt := lib.RandomBytes(16)
-	strengthenedMasterHashBytes := lib.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
+	strengthenedMasterHashSalt := libcrypto.RandomBytes(16)
+	strengthenedMasterHashBytes := libcrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
 	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(signupParameters.ProtectedDatabaseKey)
 
-	if lib.Database != nil {
-		newUser := lib.User{
+	if database.Database != nil {
+		newUser := database.User{
 			Email:                signupParameters.Email,
 			MasterHash:           strengthenedMasterHashBytes,
 			MasterHashSalt:       strengthenedMasterHashSalt,
 			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
 		}
-		lib.Database.Create(&newUser)
+		database.Database.Create(&newUser)
 		lib.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
 	} else {
 		lib.JsonResponse(response, http.StatusInternalServerError, SignupErrorResponse{Error: "The server was unable to create a new user."})
