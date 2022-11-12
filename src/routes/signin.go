@@ -56,7 +56,7 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 
 	if database.Database != nil {
 		user := database.User{}
-		database.Database.Model(database.User{Email: signinParameters.Email}).First(&user)
+		database.Database.First(&user, "email = ?", signinParameters.Email)
 
 		strengthenedMasterHashBytes := libcrypto.StrengthenMasterHash(MasterHashBytes, user.MasterHashSalt)
 		same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
