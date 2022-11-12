@@ -42,3 +42,9 @@ func (base *Base) BeforeCreate(tx *gorm.DB) (err error) {
 	base.Id = uuid.New()
 	return
 }
+
+func MigrateModels(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Credential{})
+	db.AutoMigrate(&SessionToken{})
+}

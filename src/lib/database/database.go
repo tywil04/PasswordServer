@@ -18,7 +18,5 @@ func DatabaseConnect() {
 		panic("Couldn't open database.")
 	}
 
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Credential{})
-	db.AutoMigrate(&SessionToken{})
+	MigrateModels(db)
 }
