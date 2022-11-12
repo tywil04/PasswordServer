@@ -53,7 +53,7 @@ func CreateSessionCookie(response http.ResponseWriter, user database.User) {
 	json.NewEncoder(jsonPayload).Encode(sessionCookie)
 	hashed := sha512.Sum512(jsonPayload.Bytes())
 
-	signature, _ := rsa.SignPKCS1v15(rand.Reader, &privateKey, crypto.SHA512, hashed[:])
+	signature, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, hashed[:])
 
 	encodedSignature := base64.StdEncoding.EncodeToString(signature)
 	encodedSessionCookie := base64.StdEncoding.EncodeToString(jsonPayload.Bytes())
