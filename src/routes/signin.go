@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
@@ -64,18 +62,7 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 		same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
 
 		if same {
-			privateKey, _ := rsa.GenerateKey(rand.Reader, 4096)
-			publicKey := &privateKey.PublicKey
-
-			sessionToken := database.SessionToken{
-				UserId: user.Id,
-				N:      publicKey.N.Bytes(),
-				E:      publicKey.E,
-			}
-			database.Database.Create(&sessionToken)
-			user.SessionTokens = append(user.SessionTokens, sessionToken)
-
-			libcrypto.CreateSessionCookie(response, *privateKey, sessionToken.Id, user.Id)
+			libcrypto.CreateSessionCookie(response, user)
 		}
 
 		lib.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})

@@ -33,10 +33,21 @@ type SessionCookie struct {
 	SessionTokenId uuid.UUID
 }
 
-func CreateSessionCookie(response http.ResponseWriter, privateKey rsa.PrivateKey, sessionTokenId uuid.UUID, userId uuid.UUID) {
+func CreateSessionCookie(response http.ResponseWriter, user database.User) {
+	privateKey, _ := rsa.GenerateKey(rand.Reader, 4096)
+	publicKey := &privateKey.PublicKey
+
+	sessionToken := database.SessionToken{
+		UserId: user.Id,
+		N:      publicKey.N.Bytes(),
+		E:      publicKey.E,
+	}
+	database.Database.Create(&sessionToken)
+	user.SessionTokens = append(user.SessionTokens, sessionToken)
+
 	sessionCookie := SessionCookie{
-		UserId:         userId,
-		SessionTokenId: sessionTokenId,
+		UserId:         user.Id,
+		SessionTokenId: sessionToken.Id,
 	}
 	jsonPayload := new(bytes.Buffer)
 	json.NewEncoder(jsonPayload).Encode(sessionCookie)
