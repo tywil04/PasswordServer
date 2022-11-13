@@ -1,6 +1,8 @@
 package database
 
 import (
+	"os"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -10,7 +12,16 @@ var (
 )
 
 func DatabaseConnect() {
-	db, dbError := gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
+	var databasePath string
+	if os.Getenv("ENVIRONMENT") == "testing" {
+		databasePath = os.Getenv("TEST_DB_PATH")
+	} else if os.Getenv("ENVIRONMENT") == "dev" {
+		databasePath = os.Getenv("DEV_DB_PATH")
+	} else {
+		databasePath = os.Getenv("DB_PATH")
+	}
+
+	db, dbError := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
 
 	Database = db
 

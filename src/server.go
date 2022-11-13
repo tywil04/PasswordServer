@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"passwordserver/src/lib/database"
 	"passwordserver/src/routes"
+
+	"github.com/joho/godotenv"
 )
 
 func handleRequests() {
@@ -14,6 +16,12 @@ func handleRequests() {
 }
 
 func main() {
+	dotenvError := godotenv.Load()
+	if dotenvError != nil {
+		panic("Error loading .env")
+	}
+
 	go database.DatabaseConnect()
+
 	handleRequests()
 }
