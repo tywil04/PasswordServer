@@ -25,7 +25,7 @@ type SigninErrorResponse struct {
 
 func SigninHandler(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
-	case "POST":
+	case http.MethodPost:
 		SigninPost(response, request)
 	}
 }
