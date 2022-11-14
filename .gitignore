@@ -1,4 +1,4 @@
 database.db
 .env
-database-dev.db 
-database-test.db 
+database-development.db 
+database-testing.db 
