@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -36,7 +36,7 @@ func TestSignup(t *testing.T) {
 	response := responseWriter.Result()
 
 	defer response.Body.Close()
-	body, bodyError := ioutil.ReadAll(response.Body)
+	body, bodyError := io.ReadAll(response.Body)
 
 	if bodyError != nil {
 		t.Errorf("Expected bodyError to be nil, got %v", bodyError)
