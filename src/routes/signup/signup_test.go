@@ -14,9 +14,6 @@ import (
 )
 
 func TestSignup(t *testing.T) {
-	os.Setenv("ENVIRONMENT", "testing")
-	go database.DatabaseConnect()
-
 	b64MasterHash := base64.StdEncoding.EncodeToString([]byte{0, 0, 0, 0, 0})
 	b64ProtectedDatabaseKey := base64.StdEncoding.EncodeToString([]byte{1, 1, 1, 1, 1})
 
@@ -53,4 +50,9 @@ func TestSignup(t *testing.T) {
 	} else {
 		t.Errorf("Expected {}, got %v", string(body))
 	}
+}
+
+func init() {
+	os.Setenv("ENVIRONMENT", "testing")
+	go database.DatabaseConnect()
 }
