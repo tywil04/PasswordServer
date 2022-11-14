@@ -14,9 +14,9 @@ var (
 func DatabaseConnect() {
 	var databasePath string
 	if os.Getenv("ENVIRONMENT") == "testing" {
-		databasePath = os.Getenv("TEST_DB_PATH")
+		databasePath = os.Getenv("TESTING_DB_PATH")
 	} else if os.Getenv("ENVIRONMENT") == "development" {
-		databasePath = os.Getenv("DEV_DB_PATH")
+		databasePath = os.Getenv("DEVELOPMENT_DB_PATH")
 	} else if os.Getenv("ENVIRONMENT") == "production" {
 		databasePath = os.Getenv("DB_PATH")
 	} else {
