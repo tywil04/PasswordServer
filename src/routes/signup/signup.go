@@ -1,4 +1,4 @@
-package routes
+package signup
 
 import (
 	"encoding/base64"
