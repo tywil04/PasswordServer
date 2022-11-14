@@ -38,7 +38,7 @@ type SessionToken struct {
 	E      int       `gorm:"type:int"`
 }
 
-func (base *Base) BeforeCreate(tx *gorm.DB) (err error) {
+func (base *Base) BeforeCreate(tx *gorm.DB) (baseError error) {
 	base.Id = uuid.New()
 	return
 }
