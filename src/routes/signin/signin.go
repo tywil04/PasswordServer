@@ -2,7 +2,7 @@ package signin
 
 import (
 	"crypto/subtle"
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"passwordserver/src/lib"
@@ -48,9 +48,9 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(signinParameters.MasterHash)
+	MasterHashBytes, dmhError := hex.DecodeString(signinParameters.MasterHash)
 	if dmhError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
+		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
 		return
 	}
 

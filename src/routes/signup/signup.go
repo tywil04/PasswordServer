@@ -1,7 +1,7 @@
 package signup
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"passwordserver/src/lib"
@@ -55,15 +55,15 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	MasterHashBytes, dmhError := base64.StdEncoding.DecodeString(signupParameters.MasterHash)
+	MasterHashBytes, dmhError := hex.DecodeString(signupParameters.MasterHash)
 	if dmhError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode base64 encoded parameter 'MasterHash'."})
+		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
 		return
 	}
 
 	strengthenedMasterHashSalt := libcrypto.RandomBytes(16)
 	strengthenedMasterHashBytes := libcrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
-	decodedProtectedDatabaseKey, _ := base64.StdEncoding.DecodeString(signupParameters.ProtectedDatabaseKey)
+	decodedProtectedDatabaseKey, _ := hex.DecodeString(signupParameters.ProtectedDatabaseKey)
 
 	if database.Database != nil {
 		newUser := database.User{

@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha512"
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"math/big"
 	"net/http"
@@ -55,8 +55,8 @@ func CreateSessionCookie(response http.ResponseWriter, user database.User) {
 
 	signature, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, hashed[:])
 
-	encodedSignature := base64.StdEncoding.EncodeToString(signature)
-	encodedSessionCookie := base64.StdEncoding.EncodeToString(jsonPayload.Bytes())
+	encodedSignature := hex.EncodeToString(signature)
+	encodedSessionCookie := hex.EncodeToString(jsonPayload.Bytes())
 
 	cookie := http.Cookie{
 		Name:     "SessionToken",
@@ -78,9 +78,9 @@ func VerifySessionCookie(request *http.Request) bool {
 	}
 
 	splitValue := strings.Split(cookie.Value, ",")
-	jsonSessionCookie, _ := base64.StdEncoding.DecodeString(splitValue[0])
+	jsonSessionCookie, _ := hex.DecodeString(splitValue[0])
 
-	signature, _ := base64.StdEncoding.DecodeString(splitValue[1])
+	signature, _ := hex.DecodeString(splitValue[1])
 
 	sessionCookie := SessionCookie{}
 	json.NewDecoder(bytes.NewBuffer(jsonSessionCookie)).Decode(&sessionCookie)
