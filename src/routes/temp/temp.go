@@ -8,13 +8,13 @@ import (
 
 func TempHandler(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
-	case http.MethodPost:
-		TempPost(response, request)
+	case http.MethodGet:
+		TempGet(response, request)
 	}
 }
 
-func TempPost(response http.ResponseWriter, request *http.Request) {
-	authenticated, user := libcrypto.VerifySessionCookie(request)
+func TempGet(response http.ResponseWriter, request *http.Request) {
+	authenticated, user, _, _ := libcrypto.VerifySessionCookie(request)
 
 	if authenticated {
 		fmt.Println(user.Email)
