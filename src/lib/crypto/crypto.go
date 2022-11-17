@@ -118,7 +118,7 @@ func VerifySessionCookie(request *http.Request) (bool, database.User, database.S
 	return false, database.User{}, database.SessionToken{}, customErrors.ErrorInitDatabase
 }
 
-func ClearSessionCookie(response http.ResponseWriter, request *http.Request) error {
+func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bool, error) {
 	if database.Database != nil {
 		authenticated, _, sessionToken, _ := VerifySessionCookie(request)
 
@@ -136,11 +136,11 @@ func ClearSessionCookie(response http.ResponseWriter, request *http.Request) err
 
 			database.Database.Delete(&sessionToken)
 
-			return nil
+			return true, nil
 		}
 
-		return customErrors.ErrorAuth
+		return false, nil
 	}
 
-	return customErrors.ErrorInitDatabase
+	return false, customErrors.ErrorInitDatabase
 }
