@@ -105,7 +105,7 @@ func VerifySessionCookie(request *http.Request) (bool, database.User) {
 		hashed := sha512.Sum512(jsonPayload.Bytes())
 
 		user := database.User{}
-		database.Database.First("id = ?", sessionToken.UserId)
+		database.Database.First(&user, "id = ?", sessionToken.UserId)
 
 		if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
 			return true, user
