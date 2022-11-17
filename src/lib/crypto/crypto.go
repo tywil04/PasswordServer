@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"math/big"
 	"net/http"
+	customErrors "passwordserver/src/lib/cerrors"
 	"passwordserver/src/lib/database"
 	"strings"
 	"time"
@@ -72,16 +73,16 @@ func CreateSessionCookie(response http.ResponseWriter, user database.User) error
 
 		return nil
 	} else {
-		return database.Database.Error
+		return customErrors.ErrorInitDatabase
 	}
 }
 
-func VerifySessionCookie(request *http.Request) (bool, database.User) {
+func VerifySessionCookie(request *http.Request) (bool, database.User, database.SessionToken, error) {
 	if database.Database != nil {
 		cookie, cookieError := request.Cookie("SessionToken")
 
 		if cookieError != nil {
-			return false, database.User{}
+			return false, database.User{}, database.SessionToken{}, cookieError
 		}
 
 		splitValue := strings.Split(cookie.Value, ",")
@@ -104,15 +105,42 @@ func VerifySessionCookie(request *http.Request) (bool, database.User) {
 		json.NewEncoder(jsonPayload).Encode(sessionCookie)
 		hashed := sha512.Sum512(jsonPayload.Bytes())
 
-		user := database.User{}
-		database.Database.First(&user, "id = ?", sessionToken.UserId)
-
 		if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
-			return true, user
+			user := database.User{}
+			database.Database.First(&user, "id = ?", sessionToken.UserId)
+
+			return true, user, sessionToken, nil
 		}
 
-		return false, database.User{}
-	} else {
-		return false, database.User{}
+		return false, database.User{}, database.SessionToken{}, nil
 	}
+
+	return false, database.User{}, database.SessionToken{}, customErrors.ErrorInitDatabase
+}
+
+func ClearSessionCookie(response http.ResponseWriter, request *http.Request) error {
+	if database.Database != nil {
+		authenticated, _, sessionToken, _ := VerifySessionCookie(request)
+
+		if authenticated {
+			cookie := http.Cookie{
+				Name:     "SessionToken",
+				Value:    "",
+				MaxAge:   -1,
+				Secure:   false,
+				HttpOnly: true,
+				Path:     "/",
+			}
+
+			http.SetCookie(response, &cookie)
+
+			database.Database.Delete(&sessionToken)
+
+			return nil
+		}
+
+		return customErrors.ErrorAuth
+	}
+
+	return customErrors.ErrorInitDatabase
 }
