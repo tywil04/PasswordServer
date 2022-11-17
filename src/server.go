@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"passwordserver/src/lib/database"
 	"passwordserver/src/routes/signin"
+	"passwordserver/src/routes/signout"
 	"passwordserver/src/routes/signup"
 	"passwordserver/src/routes/temp"
 
@@ -13,6 +14,7 @@ import (
 func handleRequests() {
 	http.HandleFunc("/api/v1/auth/signin", signin.SigninHandler)
 	http.HandleFunc("/api/v1/auth/signup", signup.SignupHandler)
+	http.HandleFunc("/api/v1/auth/signout", signout.SignoutHandler)
 	http.HandleFunc("/temp", temp.TempHandler)
 
 	http.ListenAndServe(":8000", nil)
