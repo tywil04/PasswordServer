@@ -85,6 +85,10 @@ func VerifySessionCookie(request *http.Request) (bool, database.User, database.S
 			return false, database.User{}, database.SessionToken{}, cookieError
 		}
 
+		if cookie.Value == "" {
+			return false, database.User{}, database.SessionToken{}, nil
+		}
+
 		splitValue := strings.Split(cookie.Value, ",")
 		jsonSessionCookie, _ := hex.DecodeString(splitValue[0])
 
