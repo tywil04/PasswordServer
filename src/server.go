@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	customErrors "passwordserver/src/lib/cerrors"
 	"passwordserver/src/lib/database"
 	"passwordserver/src/routes/signin"
 	"passwordserver/src/routes/signout"
@@ -23,7 +24,7 @@ func handleRequests() {
 func main() {
 	dotenvError := godotenv.Load()
 	if dotenvError != nil {
-		panic("Error loading .env")
+		panic(customErrors.ErrorLoadingEnv)
 	}
 
 	go database.DatabaseConnect()
