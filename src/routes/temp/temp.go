@@ -6,7 +6,7 @@ import (
 	libcrypto "passwordserver/src/lib/crypto"
 )
 
-func SignupHandler(response http.ResponseWriter, request *http.Request) {
+func TempHandler(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case http.MethodPost:
 		TempPost(response, request)
@@ -18,5 +18,7 @@ func TempPost(response http.ResponseWriter, request *http.Request) {
 
 	if authenticated {
 		fmt.Println(user.Email)
+	} else {
+		fmt.Println("User not authenticated")
 	}
 }
