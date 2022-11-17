@@ -2,7 +2,6 @@ package signup_test
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -14,8 +13,8 @@ import (
 )
 
 func TestSignup(t *testing.T) {
-	b64MasterHash := hex.EncodeToString([]byte{0, 0, 0, 0, 0})
-	b64ProtectedDatabaseKey := hex.EncodeToString([]byte{1, 1, 1, 1, 1})
+	b64MasterHash := "bb01afb3beea90574f8397153ff11b38f80e4f64635c2a21f665a903ce18cdf4f86dff9157ac40e88e052beb3107118a442f37be192162225d8b66b1b4df2982"
+	b64ProtectedDatabaseKey := "bc7decd789599be8b7f11b1f87c1c6d6;c098ab38579f9c4f4e091361de8273ef0e7f27f5a665c9248baea1554cf36682466cbb5eb2dc97fd5dbf5cce40c0f849"
 
 	parameters := signup.SignupParameters{
 		Email:                "testEmail",
