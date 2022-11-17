@@ -62,7 +62,12 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 		same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
 
 		if same {
-			libcrypto.CreateSessionCookie(response, user)
+			cookieError := libcrypto.CreateSessionCookie(response, user)
+
+			if cookieError != nil {
+				lib.JsonResponse(response, http.StatusInternalServerError, SigninErrorResponse{Error: "Error while setting session cookie."})
+				return
+			}
 		}
 
 		lib.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
