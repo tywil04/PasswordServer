@@ -26,13 +26,6 @@ type SignupErrorResponse struct {
 	Error string
 }
 
-func SignupHandler(response http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case http.MethodPost:
-		SignupPost(response, request)
-	}
-}
-
 func SignupPost(response http.ResponseWriter, request *http.Request) {
 	signupParameters := SignupParameters{}
 	decoderError := json.NewDecoder(request.Body).Decode(&signupParameters)

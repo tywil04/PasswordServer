@@ -15,13 +15,6 @@ type SignoutErrorResponse struct {
 	Error string
 }
 
-func SignoutHandler(response http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case http.MethodDelete:
-		SignoutDelete(response, request)
-	}
-}
-
 func SignoutDelete(response http.ResponseWriter, request *http.Request) {
 	signedOut, cscError := psCrypto.ClearSessionCookie(response, request)
 

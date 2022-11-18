@@ -24,13 +24,6 @@ type SigninErrorResponse struct {
 	Error string
 }
 
-func SigninHandler(response http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case http.MethodPost:
-		SigninPost(response, request)
-	}
-}
-
 func SigninPost(response http.ResponseWriter, request *http.Request) {
 	signinParameters := SigninParameters{}
 	decoderError := json.NewDecoder(request.Body).Decode(&signinParameters)
