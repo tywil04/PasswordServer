@@ -2,7 +2,8 @@ package database
 
 import (
 	"os"
-	customErrors "passwordserver/src/lib/cerrors"
+
+	psErrors "passwordserver/src/lib/errors"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -21,16 +22,16 @@ func DatabaseConnect() {
 	} else if os.Getenv("ENVIRONMENT") == "production" {
 		databasePath = os.Getenv("DB_PATH")
 	} else {
-		panic(customErrors.ErrorEnvironmentEnvNotFound)
+		panic(psErrors.ErrorEnvironmentEnvNotFound)
 	}
 
 	db, dbError := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
 
-	Database = db
-
 	if dbError != nil {
-		panic(customErrors.ErrorLoadingDatabase)
+		panic(psErrors.ErrorLoadingDatabase)
 	}
+
+	Database = db
 
 	MigrateModels(db)
 }

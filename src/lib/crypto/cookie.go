@@ -10,10 +10,11 @@ import (
 	"encoding/json"
 	"math/big"
 	"net/http"
-	customErrors "passwordserver/src/lib/cerrors"
-	"passwordserver/src/lib/database"
 	"strings"
 	"time"
+
+	psDatabase "passwordserver/src/lib/database"
+	psErrors "passwordserver/src/lib/errors"
 
 	"github.com/google/uuid"
 )
@@ -23,17 +24,17 @@ type SessionCookie struct {
 	SessionTokenId uuid.UUID
 }
 
-func CreateSessionCookie(response http.ResponseWriter, user database.User) error {
-	if database.Database != nil {
+func CreateSessionCookie(response http.ResponseWriter, user psDatabase.User) error {
+	if psDatabase.Database != nil {
 		privateKey, _ := rsa.GenerateKey(rand.Reader, 4096)
 		publicKey := &privateKey.PublicKey
 
-		sessionToken := database.SessionToken{
+		sessionToken := psDatabase.SessionToken{
 			UserId: user.Id,
 			N:      publicKey.N.Bytes(),
 			E:      publicKey.E,
 		}
-		database.Database.Create(&sessionToken)
+		psDatabase.Database.Create(&sessionToken)
 		user.SessionTokens = append(user.SessionTokens, sessionToken)
 
 		sessionCookie := SessionCookie{
@@ -62,20 +63,20 @@ func CreateSessionCookie(response http.ResponseWriter, user database.User) error
 
 		return nil
 	} else {
-		return customErrors.ErrorInitDatabase
+		return psErrors.ErrorInitDatabase
 	}
 }
 
-func VerifySessionCookie(request *http.Request) (bool, database.User, database.SessionToken, error) {
-	if database.Database != nil {
+func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDatabase.SessionToken, error) {
+	if psDatabase.Database != nil {
 		cookie, cookieError := request.Cookie("SessionToken")
 
 		if cookieError != nil {
-			return false, database.User{}, database.SessionToken{}, cookieError
+			return false, psDatabase.User{}, psDatabase.SessionToken{}, cookieError
 		}
 
 		if cookie.Value == "" {
-			return false, database.User{}, database.SessionToken{}, nil
+			return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
 		}
 
 		splitValue := strings.Split(cookie.Value, ",")
@@ -86,8 +87,8 @@ func VerifySessionCookie(request *http.Request) (bool, database.User, database.S
 		sessionCookie := SessionCookie{}
 		json.NewDecoder(bytes.NewBuffer(jsonSessionCookie)).Decode(&sessionCookie)
 
-		sessionToken := database.SessionToken{}
-		database.Database.First(&sessionToken, "id = ?", sessionCookie.SessionTokenId, "user_id = ?", sessionCookie.UserId)
+		sessionToken := psDatabase.SessionToken{}
+		psDatabase.Database.First(&sessionToken, "id = ?", sessionCookie.SessionTokenId, "user_id = ?", sessionCookie.UserId)
 
 		publicKey := rsa.PublicKey{
 			N: new(big.Int).SetBytes(sessionToken.N),
@@ -99,20 +100,20 @@ func VerifySessionCookie(request *http.Request) (bool, database.User, database.S
 		hashed := sha512.Sum512(jsonPayload.Bytes())
 
 		if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
-			user := database.User{}
-			database.Database.First(&user, "id = ?", sessionToken.UserId)
+			user := psDatabase.User{}
+			psDatabase.Database.First(&user, "id = ?", sessionToken.UserId)
 
 			return true, user, sessionToken, nil
 		}
 
-		return false, database.User{}, database.SessionToken{}, nil
+		return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
 	}
 
-	return false, database.User{}, database.SessionToken{}, customErrors.ErrorInitDatabase
+	return false, psDatabase.User{}, psDatabase.SessionToken{}, psErrors.ErrorInitDatabase
 }
 
 func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bool, error) {
-	if database.Database != nil {
+	if psDatabase.Database != nil {
 		authenticated, _, sessionToken, _ := VerifySessionCookie(request)
 
 		if authenticated {
@@ -127,7 +128,7 @@ func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bo
 
 			http.SetCookie(response, &cookie)
 
-			database.Database.Delete(&sessionToken)
+			psDatabase.Database.Delete(&sessionToken)
 
 			return true, nil
 		}
@@ -135,5 +136,5 @@ func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bo
 		return false, nil
 	}
 
-	return false, customErrors.ErrorInitDatabase
+	return false, psErrors.ErrorInitDatabase
 }
