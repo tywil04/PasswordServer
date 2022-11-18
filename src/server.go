@@ -8,6 +8,8 @@ import (
 
 	"passwordserver/src/backend"
 	"passwordserver/src/backend/routes"
+	"passwordserver/src/frontend"
+	"passwordserver/src/frontend/pages"
 
 	psDatabase "passwordserver/src/lib/database"
 	psErrors "passwordserver/src/lib/errors"
@@ -29,6 +31,9 @@ func handleRequests() {
 	http.HandleFunc("/api/v1/auth/signup", backend.RouteHandler(http.MethodPost, routes.SignupPost))
 	http.HandleFunc("/api/v1/auth/signout", backend.RouteHandler(http.MethodDelete, routes.SignoutDelete))
 	http.HandleFunc("/temp", backend.RouteHandler(http.MethodGet, routes.TempGet))
+
+	// Pages
+	http.HandleFunc("/testing", frontend.RouteHandler("index.html", pages.IndexHandler))
 
 	http.ListenAndServe(":8000", nil)
 }
