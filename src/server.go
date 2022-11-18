@@ -13,7 +13,7 @@ import (
 
 	psDatabase "passwordserver/src/lib/database"
 	psErrors "passwordserver/src/lib/errors"
-	psCustomFS "passwordserver/src/lib/fs"
+	psFS "passwordserver/src/lib/fs"
 
 	"github.com/joho/godotenv"
 )
@@ -24,7 +24,7 @@ var publicDir, _ = fs.Sub(publicFS, "public")
 
 func handleRequests() {
 	// Static Path
-	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(psCustomFS.FileSystem{Fs: http.FS(publicDir)})))
+	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(psFS.FileSystem{Fs: http.FS(publicDir)})))
 
 	// API Routes
 	http.HandleFunc("/api/v1/auth/signin", backend.Route(backend.MethodMap{Post: routes.SigninPost}))
@@ -33,7 +33,8 @@ func handleRequests() {
 	http.HandleFunc("/temp", backend.Route(backend.MethodMap{Get: routes.TempGet}))
 
 	// Pages
-	http.HandleFunc("/testing", frontend.Route(pages.IndexHandler))
+	http.HandleFunc("/auth/signin", frontend.Route(pages.Signin))
+	http.HandleFunc("/auth/signup", frontend.Route(pages.Signup))
 
 	http.ListenAndServe(":8000", nil)
 }

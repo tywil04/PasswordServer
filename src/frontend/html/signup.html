@@ -1,0 +1,30 @@
+{{template "layout.html" .}}
+
+{{define "title" -}}
+    Signup
+{{end}}
+
+{{define "body" -}}
+    <script src="/public/js/signup.js" type="module"></script>
+
+    <main class="vBox justifyContentCentre wFull hFull">
+        <div class="hBox justifyContentCentre wFull hFit">
+            <div class="vBox wFit hFit">
+                <h1 class="mTop0 mBottom">Signup</h1>
+
+                <div class="hBox wFit hFit mBottom">
+                    <div class="vBox mRight">
+                        <label class="grow flex alignItemsCentre mBottom" for="email">Email</label>
+                        <label class="grow flex alignItemsCentre" for="password">Password</label>
+                    </div>
+                    <div class="vBox">
+                        <input id="email" class="grow flex alignItemsCentre mBottom" name="email" type="text"/>
+                        <input id="password" class="grow flex alignItemsCentre" name="password" type="password"/>
+                    </div>
+                </div>
+
+                <button onclick="signup(document.querySelector('#email'), document.querySelector('#password'))">Create account</button>
+            </div>
+        </div>
+    </main>
+{{end}}
