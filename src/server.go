@@ -33,7 +33,7 @@ func handleRequests() {
 	http.HandleFunc("/temp", backend.Route(backend.MethodMap{Get: routes.TempGet}))
 
 	// Pages
-	http.HandleFunc("/testing", frontend.RouteHandler("index.html", pages.IndexHandler))
+	http.HandleFunc("/testing", frontend.Route(pages.IndexHandler))
 
 	http.ListenAndServe(":8000", nil)
 }
