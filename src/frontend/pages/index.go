@@ -6,14 +6,14 @@ import (
 	"text/template"
 )
 
-type IndexParameters struct {
+type IndexData struct {
 	Test string
 }
 
 func IndexHandler(response http.ResponseWriter, request *http.Request, htmlDir fs.FS) {
 	template := template.Must(template.ParseFS(htmlDir, "index.html"))
 
-	indexParameters := IndexParameters{Test: "Testing Context!"}
+	indexData := IndexData{Test: "Testing Context!"}
 
-	template.Execute(response, indexParameters)
+	template.Execute(response, indexData)
 }
