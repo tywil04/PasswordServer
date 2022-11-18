@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"passwordserver/src/lib"
-	libcrypto "passwordserver/src/lib/crypto"
+	psCrypto "passwordserver/src/lib/crypto"
+	psUtils "passwordserver/src/lib/utils"
 )
 
 type SignoutResponse struct {
@@ -23,12 +23,12 @@ func SignoutHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func SignoutDelete(response http.ResponseWriter, request *http.Request) {
-	signedOut, cscError := libcrypto.ClearSessionCookie(response, request)
+	signedOut, cscError := psCrypto.ClearSessionCookie(response, request)
 
 	if cscError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SignoutErrorResponse{Error: "Error while trying to clear session cookie."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignoutErrorResponse{Error: "Error while trying to clear session cookie."})
 		return
 	}
 
-	lib.JsonResponse(response, http.StatusOK, SignoutResponse{SignedOut: signedOut})
+	psUtils.JsonResponse(response, http.StatusOK, SignoutResponse{SignedOut: signedOut})
 }

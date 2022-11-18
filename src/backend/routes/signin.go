@@ -5,9 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
-	"passwordserver/src/lib"
-	libcrypto "passwordserver/src/lib/crypto"
-	"passwordserver/src/lib/database"
+
+	psCrypto "passwordserver/src/lib/crypto"
+	psDatabase "passwordserver/src/lib/database"
+	psUtils "passwordserver/src/lib/utils"
 )
 
 type SigninParameters struct {
@@ -34,42 +35,42 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 	signinParameters := SigninParameters{}
 	decoderError := json.NewDecoder(request.Body).Decode(&signinParameters)
 	if decoderError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode JSON body."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode JSON body."})
 		return
 	}
 
 	if signinParameters.MasterHash == "" {
-		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
 		return
 	}
 
 	if signinParameters.Email == "" {
-		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'Email' not provided."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Required parameter 'Email' not provided."})
 		return
 	}
 
 	MasterHashBytes, dmhError := hex.DecodeString(signinParameters.MasterHash)
 	if dmhError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SigninErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
 		return
 	}
 
-	if database.Database != nil {
-		user := database.User{}
-		database.Database.First(&user, "email = ?", signinParameters.Email)
+	if psDatabase.Database != nil {
+		user := psDatabase.User{}
+		psDatabase.Database.First(&user, "email = ?", signinParameters.Email)
 
-		strengthenedMasterHashBytes := libcrypto.StrengthenMasterHash(MasterHashBytes, user.MasterHashSalt)
+		strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, user.MasterHashSalt)
 		same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
 
 		if same {
-			cookieError := libcrypto.CreateSessionCookie(response, user)
+			cookieError := psCrypto.CreateSessionCookie(response, user)
 
 			if cookieError != nil {
-				lib.JsonResponse(response, http.StatusInternalServerError, SigninErrorResponse{Error: "Error while setting session cookie."})
+				psUtils.JsonResponse(response, http.StatusInternalServerError, SigninErrorResponse{Error: "Error while setting session cookie."})
 				return
 			}
 		}
 
-		lib.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
+		psUtils.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
 	}
 }

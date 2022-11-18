@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
-	"passwordserver/src/lib"
-	libcrypto "passwordserver/src/lib/crypto"
-	"passwordserver/src/lib/database"
+
+	psCrypto "passwordserver/src/lib/crypto"
+	psDatabase "passwordserver/src/lib/database"
+	psUtils "passwordserver/src/lib/utils"
 
 	"github.com/google/uuid"
 )
@@ -36,46 +37,46 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 	signupParameters := SignupParameters{}
 	decoderError := json.NewDecoder(request.Body).Decode(&signupParameters)
 	if decoderError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode JSON body."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode JSON body."})
 		return
 	}
 
 	if signupParameters.Email == "" {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'Email' not provided."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'Email' not provided."})
 		return
 	}
 
 	if signupParameters.MasterHash == "" {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'MasterHash' not provided."})
 		return
 	}
 
 	if signupParameters.ProtectedDatabaseKey == "" {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'ProtectedDatabaseKey' not provided."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Required parameter 'ProtectedDatabaseKey' not provided."})
 		return
 	}
 
 	MasterHashBytes, dmhError := hex.DecodeString(signupParameters.MasterHash)
 	if dmhError != nil {
-		lib.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
+		psUtils.JsonResponse(response, http.StatusBadRequest, SignupErrorResponse{Error: "Unable to decode hex encoded parameter 'MasterHash'."})
 		return
 	}
 
-	strengthenedMasterHashSalt := libcrypto.RandomBytes(16)
-	strengthenedMasterHashBytes := libcrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
+	strengthenedMasterHashSalt := psCrypto.RandomBytes(16)
+	strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
 	decodedProtectedDatabaseKey, _ := hex.DecodeString(signupParameters.ProtectedDatabaseKey)
 
-	if database.Database != nil {
-		newUser := database.User{
+	if psDatabase.Database != nil {
+		newUser := psDatabase.User{
 			Email:                signupParameters.Email,
 			MasterHash:           strengthenedMasterHashBytes,
 			MasterHashSalt:       strengthenedMasterHashSalt,
 			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
 		}
-		database.Database.Create(&newUser)
-		lib.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
+		psDatabase.Database.Create(&newUser)
+		psUtils.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
 	} else {
-		lib.JsonResponse(response, http.StatusInternalServerError, SignupErrorResponse{Error: "The server was unable to create a new user."})
+		psUtils.JsonResponse(response, http.StatusInternalServerError, SignupErrorResponse{Error: "The server was unable to create a new user."})
 		return
 	}
 }

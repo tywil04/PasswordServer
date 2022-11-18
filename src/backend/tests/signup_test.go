@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"passwordserver/src/backend/routes"
-	"passwordserver/src/lib/database"
 	"testing"
+
+	"passwordserver/src/backend/routes"
+
+	psDatabase "passwordserver/src/lib/database"
 )
 
 func TestSignup(t *testing.T) {
@@ -53,5 +55,5 @@ func TestSignup(t *testing.T) {
 
 func init() {
 	os.Setenv("ENVIRONMENT", "testing")
-	go database.DatabaseConnect()
+	go psDatabase.DatabaseConnect()
 }

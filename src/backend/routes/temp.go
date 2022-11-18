@@ -3,7 +3,8 @@ package routes
 import (
 	"fmt"
 	"net/http"
-	libcrypto "passwordserver/src/lib/crypto"
+
+	psCrypto "passwordserver/src/lib/crypto"
 )
 
 func TempHandler(response http.ResponseWriter, request *http.Request) {
@@ -14,7 +15,7 @@ func TempHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func TempGet(response http.ResponseWriter, request *http.Request) {
-	authenticated, user, _, _ := libcrypto.VerifySessionCookie(request)
+	authenticated, user, _, _ := psCrypto.VerifySessionCookie(request)
 
 	if authenticated {
 		fmt.Println(user.Email)

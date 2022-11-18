@@ -4,12 +4,14 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"strings"
+
 	"passwordserver/src/backend"
 	"passwordserver/src/backend/routes"
-	customErrors "passwordserver/src/lib/cerrors"
-	"passwordserver/src/lib/database"
-	customFS "passwordserver/src/lib/fs"
-	"strings"
+
+	psDatabase "passwordserver/src/lib/database"
+	psErrors "passwordserver/src/lib/errors"
+	psCustomFS "passwordserver/src/lib/fs"
 
 	"github.com/joho/godotenv"
 )
@@ -20,7 +22,7 @@ var publicDir, _ = fs.Sub(publicFS, "public")
 
 func handleRequests() {
 	// Static Path
-	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(customFS.FileSystem{Fs: http.FS(publicDir)})))
+	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(psCustomFS.FileSystem{Fs: http.FS(publicDir)})))
 
 	// API Routes
 	http.HandleFunc("/api/v1/auth/signin", backend.RouteHandler(http.MethodPost, routes.SigninPost))
@@ -34,10 +36,10 @@ func handleRequests() {
 func main() {
 	dotenvError := godotenv.Load()
 	if dotenvError != nil {
-		panic(customErrors.ErrorLoadingEnv)
+		panic(psErrors.ErrorLoadingEnv)
 	}
 
-	go database.DatabaseConnect()
+	go psDatabase.DatabaseConnect()
 
 	handleRequests()
 }
