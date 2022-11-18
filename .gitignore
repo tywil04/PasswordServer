@@ -2,3 +2,4 @@ database.db
 .env
 database-development.db 
 database-testing.db 
+server
