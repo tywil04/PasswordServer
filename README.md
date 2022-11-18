@@ -5,6 +5,7 @@ This is the code for my Computer Science A Level project. The password manager i
 - `gorm` which is an awesome database orm, this project is using sqlite3 however gorm supports many more databases. 
 - `github.com/google/uuid` which allows me to use UUID's. I use uuid's as the id's for my database.
 - `golang.org/x/crypto` which is only used so I can use the pbkdf2 key derivation function.
+- `github.com/joho/godotenv` which loads environment variables that the application can read/write.
 
 # Building
 Building a go application is very simple. The server compiles into a single executable that embeds everything in src/public/* and src/frontend/html/*
