@@ -1,4 +1,4 @@
-package signout
+package routes
 
 import (
 	"net/http"

@@ -1,4 +1,4 @@
-package signup
+package routes
 
 import (
 	"encoding/hex"

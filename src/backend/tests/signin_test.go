@@ -1,4 +1,4 @@
-package signin_test
+package tests
 
 import (
 	"testing"
