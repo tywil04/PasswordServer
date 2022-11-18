@@ -27,10 +27,10 @@ func handleRequests() {
 	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(psCustomFS.FileSystem{Fs: http.FS(publicDir)})))
 
 	// API Routes
-	http.HandleFunc("/api/v1/auth/signin", backend.RouteHandler(http.MethodPost, routes.SigninPost))
-	http.HandleFunc("/api/v1/auth/signup", backend.RouteHandler(http.MethodPost, routes.SignupPost))
-	http.HandleFunc("/api/v1/auth/signout", backend.RouteHandler(http.MethodDelete, routes.SignoutDelete))
-	http.HandleFunc("/temp", backend.RouteHandler(http.MethodGet, routes.TempGet))
+	http.HandleFunc("/api/v1/auth/signin", backend.Route(backend.MethodMap{Post: routes.SigninPost}))
+	http.HandleFunc("/api/v1/auth/signup", backend.Route(backend.MethodMap{Post: routes.SignupPost}))
+	http.HandleFunc("/api/v1/auth/signout", backend.Route(backend.MethodMap{Delete: routes.SignoutDelete}))
+	http.HandleFunc("/temp", backend.Route(backend.MethodMap{Get: routes.TempGet}))
 
 	// Pages
 	http.HandleFunc("/testing", frontend.RouteHandler("index.html", pages.IndexHandler))
