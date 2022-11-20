@@ -20,15 +20,23 @@ type User struct {
 	MasterHash           []byte         `gorm:"type:bytes"`
 	MasterHashSalt       []byte         `gorm:"type:bytes"`
 	ProtectedDatabaseKey []byte         `gorm:"type:bytes"`
-	Credentials          []Credential   `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	SecureEntries        []SecureEntry  `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	SessionTokens        []SessionToken `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
-type Credential struct {
+type SecureEntry struct {
 	Base
-	UserId   uuid.UUID `gorm:"type:uuid"`
-	Username []byte    `gorm:"type:bytes"`
-	Password []byte    `gorm:"type:bytes"`
+	UserId           uuid.UUID         `gorm:"type:uuid"`
+	Username         []byte            `gorm:"type:bytes"`
+	Password         []byte            `gorm:"type:bytes"`
+	AdditionalFields []AdditionalField `gorm:"foreignKey:CredentialId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+}
+
+type AdditionalField struct {
+	Base
+	CredentialId uuid.UUID `gorm:"type:uuid"`
+	Field        string    `gorm:"type:string"`
+	Value        string    `gorm:"type:string"`
 }
 
 type SessionToken struct {
@@ -40,11 +48,12 @@ type SessionToken struct {
 
 func (base *Base) BeforeCreate(tx *gorm.DB) (baseError error) {
 	base.Id = uuid.New()
-	return
+	return nil
 }
 
 func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Credential{})
+	db.AutoMigrate(&SecureEntry{})
+	db.AutoMigrate(&AdditionalField{})
 	db.AutoMigrate(&SessionToken{})
 }
