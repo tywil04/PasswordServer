@@ -1,0 +1,23 @@
+{{template "authlayout.html" .}}
+
+{{define "title" -}}
+    Signup
+{{end}}
+
+{{define "submitHandler" -}}
+    signup()
+{{end}}
+
+{{define "labels" -}} 
+    <label class="grow flex alignItemsCentre mBottom" for="email">Email</label>
+    <label class="grow flex alignItemsCentre" for="password">Password</label>
+{{end}}
+
+{{define "inputs" -}}
+    <input id="email" class="grow flex alignItemsCentre mBottom" name="email" type="text" autocomplete="email" autocapitalize="false" autofocus="true"/>
+    <input id="password" class="grow flex alignItemsCentre" name="password" type="password" autocomplete="new-password" autocapitalize="true"/>
+{{end}}
+
+{{define "buttonLabel" -}} 
+    Create account
+{{end}}

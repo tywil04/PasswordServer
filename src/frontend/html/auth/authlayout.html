@@ -1,0 +1,24 @@
+{{template "base.html" .}}
+
+{{define "body" -}}
+    <script src="/public/js/signup.js" type="module"></script>
+
+    <main class="vBox justifyContentCentre wFull hFull">
+        <div class="hBox justifyContentCentre wFull hFit">
+            <div class="vBox wFit hFit">
+                <h1 class="mTop0 mBottom">{{block "title" .}}{{end}}</h1>
+
+                <div class="hBox wFit hFit mBottom">
+                    <div class="vBox mRight">
+                        {{block "labels" .}}{{end}}
+                    </div>
+                    <div class="vBox">
+                        {{block "inputs" .}}{{end}}
+                    </div>
+                </div>
+
+                <button onclick="{{block "submitHandler" .}}{{end}}" type="button">{{block "buttonLabel" .}}{{end}}</button>
+            </div>
+        </div>
+    </main>
+{{end}}

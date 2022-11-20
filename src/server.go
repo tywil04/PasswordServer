@@ -30,6 +30,7 @@ func handleRequests() {
 	http.HandleFunc("/api/v1/auth/signin", backend.Route(backend.MethodMap{Post: routes.SigninPost}))
 	http.HandleFunc("/api/v1/auth/signup", backend.Route(backend.MethodMap{Post: routes.SignupPost}))
 	http.HandleFunc("/api/v1/auth/signout", backend.Route(backend.MethodMap{Delete: routes.SignoutDelete}))
+	http.HandleFunc("/api/v1/user/protectedDatabaseKey", backend.Route(backend.MethodMap{Get: routes.ProtectedDatabaseKeyGet}))
 	http.HandleFunc("/temp", backend.Route(backend.MethodMap{Get: routes.TempGet}))
 
 	// Pages
