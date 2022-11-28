@@ -15,13 +15,14 @@ var (
 
 func DatabaseConnect() {
 	var databasePath string
-	if os.Getenv("ENVIRONMENT") == "testing" {
+	switch os.Getenv("ENVIRONMENT") {
+	case "testing":
 		databasePath = os.Getenv("TESTING_DB_PATH")
-	} else if os.Getenv("ENVIRONMENT") == "development" {
+	case "development":
 		databasePath = os.Getenv("DEVELOPMENT_DB_PATH")
-	} else if os.Getenv("ENVIRONMENT") == "production" {
+	case "production":
 		databasePath = os.Getenv("DB_PATH")
-	} else {
+	default:
 		panic(psErrors.ErrorEnvironmentEnvNotFound)
 	}
 
