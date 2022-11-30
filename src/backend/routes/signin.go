@@ -48,22 +48,20 @@ func SigninPost(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if psDatabase.Database != nil {
-		user := psDatabase.User{}
-		psDatabase.Database.First(&user, "email = ?", signinParameters.Email)
+	user := psDatabase.User{}
+	psDatabase.Database.First(&user, "email = ?", signinParameters.Email)
 
-		strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, user.MasterHashSalt)
-		same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
+	strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, user.MasterHashSalt)
+	same := subtle.ConstantTimeCompare(user.MasterHash, strengthenedMasterHashBytes) == 1
 
-		if same {
-			cookieError := psCrypto.CreateSessionCookie(response, user)
+	if same {
+		cookieError := psCrypto.CreateSessionCookie(response, user)
 
-			if cookieError != nil {
-				psUtils.JsonResponse(response, http.StatusInternalServerError, SigninErrorResponse{Error: "Error while setting session cookie."})
-				return
-			}
+		if cookieError != nil {
+			psUtils.JsonResponse(response, http.StatusInternalServerError, SigninErrorResponse{Error: "Error while setting session cookie."})
+			return
 		}
-
-		psUtils.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
 	}
+
+	psUtils.JsonResponse(response, http.StatusOK, SigninResponse{Authenticated: same})
 }

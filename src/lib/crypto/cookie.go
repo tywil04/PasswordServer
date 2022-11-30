@@ -14,7 +14,6 @@ import (
 	"time"
 
 	psDatabase "passwordserver/src/lib/database"
-	psErrors "passwordserver/src/lib/errors"
 
 	"github.com/google/uuid"
 )
@@ -25,35 +24,93 @@ type SessionCookie struct {
 }
 
 func CreateSessionCookie(response http.ResponseWriter, user psDatabase.User) error {
-	if psDatabase.Database != nil {
-		privateKey, _ := rsa.GenerateKey(rand.Reader, 4096)
-		publicKey := &privateKey.PublicKey
+	privateKey, _ := rsa.GenerateKey(rand.Reader, 4096)
+	publicKey := &privateKey.PublicKey
 
-		sessionToken := psDatabase.SessionToken{
-			UserId: user.Id,
-			N:      publicKey.N.Bytes(),
-			E:      publicKey.E,
-		}
-		psDatabase.Database.Create(&sessionToken)
-		user.SessionTokens = append(user.SessionTokens, sessionToken)
+	sessionToken := psDatabase.SessionToken{
+		UserId: user.Id,
+		N:      publicKey.N.Bytes(),
+		E:      publicKey.E,
+	}
+	psDatabase.Database.Create(&sessionToken)
+	user.SessionTokens = append(user.SessionTokens, sessionToken)
 
-		sessionCookie := SessionCookie{
-			UserId:         user.Id,
-			SessionTokenId: sessionToken.Id,
-		}
-		jsonPayload := new(bytes.Buffer)
-		json.NewEncoder(jsonPayload).Encode(sessionCookie)
-		hashed := sha512.Sum512(jsonPayload.Bytes())
+	sessionCookie := SessionCookie{
+		UserId:         user.Id,
+		SessionTokenId: sessionToken.Id,
+	}
+	jsonPayload := new(bytes.Buffer)
+	json.NewEncoder(jsonPayload).Encode(sessionCookie)
+	hashed := sha512.Sum512(jsonPayload.Bytes())
 
-		signature, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, hashed[:])
+	signature, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, hashed[:])
 
-		encodedSignature := hex.EncodeToString(signature)
-		encodedSessionCookie := hex.EncodeToString(jsonPayload.Bytes())
+	encodedSignature := hex.EncodeToString(signature)
+	encodedSessionCookie := hex.EncodeToString(jsonPayload.Bytes())
 
+	cookie := http.Cookie{
+		Name:     "SessionToken",
+		Value:    encodedSessionCookie + "," + encodedSignature,
+		Expires:  time.Now().Add(45784758475874),
+		Secure:   false,
+		HttpOnly: true,
+		Path:     "/",
+	}
+
+	http.SetCookie(response, &cookie)
+
+	return nil
+}
+
+func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDatabase.SessionToken, error) {
+	cookie, cookieError := request.Cookie("SessionToken")
+
+	if cookieError != nil {
+		return false, psDatabase.User{}, psDatabase.SessionToken{}, cookieError
+	}
+
+	if cookie.Value == "" {
+		return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
+	}
+
+	splitValue := strings.Split(cookie.Value, ",")
+	jsonSessionCookie, _ := hex.DecodeString(splitValue[0])
+
+	signature, _ := hex.DecodeString(splitValue[1])
+
+	sessionCookie := SessionCookie{}
+	json.NewDecoder(bytes.NewBuffer(jsonSessionCookie)).Decode(&sessionCookie)
+
+	sessionToken := psDatabase.SessionToken{}
+	psDatabase.Database.First(&sessionToken, "id = ?", sessionCookie.SessionTokenId, "user_id = ?", sessionCookie.UserId)
+
+	publicKey := rsa.PublicKey{
+		N: new(big.Int).SetBytes(sessionToken.N),
+		E: sessionToken.E,
+	}
+
+	jsonPayload := new(bytes.Buffer)
+	json.NewEncoder(jsonPayload).Encode(sessionCookie)
+	hashed := sha512.Sum512(jsonPayload.Bytes())
+
+	if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
+		user := psDatabase.User{}
+		psDatabase.Database.First(&user, "id = ?", sessionToken.UserId)
+
+		return true, user, sessionToken, nil
+	}
+
+	return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
+}
+
+func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bool, error) {
+	authenticated, _, sessionToken, _ := VerifySessionCookie(request)
+
+	if authenticated {
 		cookie := http.Cookie{
 			Name:     "SessionToken",
-			Value:    encodedSessionCookie + "," + encodedSignature,
-			Expires:  time.Now().Add(45784758475874),
+			Value:    "",
+			MaxAge:   -1,
 			Secure:   false,
 			HttpOnly: true,
 			Path:     "/",
@@ -61,80 +118,10 @@ func CreateSessionCookie(response http.ResponseWriter, user psDatabase.User) err
 
 		http.SetCookie(response, &cookie)
 
-		return nil
-	} else {
-		return psErrors.ErrorInitDatabase
-	}
-}
+		psDatabase.Database.Delete(&sessionToken)
 
-func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDatabase.SessionToken, error) {
-	if psDatabase.Database != nil {
-		cookie, cookieError := request.Cookie("SessionToken")
-
-		if cookieError != nil {
-			return false, psDatabase.User{}, psDatabase.SessionToken{}, cookieError
-		}
-
-		if cookie.Value == "" {
-			return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
-		}
-
-		splitValue := strings.Split(cookie.Value, ",")
-		jsonSessionCookie, _ := hex.DecodeString(splitValue[0])
-
-		signature, _ := hex.DecodeString(splitValue[1])
-
-		sessionCookie := SessionCookie{}
-		json.NewDecoder(bytes.NewBuffer(jsonSessionCookie)).Decode(&sessionCookie)
-
-		sessionToken := psDatabase.SessionToken{}
-		psDatabase.Database.First(&sessionToken, "id = ?", sessionCookie.SessionTokenId, "user_id = ?", sessionCookie.UserId)
-
-		publicKey := rsa.PublicKey{
-			N: new(big.Int).SetBytes(sessionToken.N),
-			E: sessionToken.E,
-		}
-
-		jsonPayload := new(bytes.Buffer)
-		json.NewEncoder(jsonPayload).Encode(sessionCookie)
-		hashed := sha512.Sum512(jsonPayload.Bytes())
-
-		if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
-			user := psDatabase.User{}
-			psDatabase.Database.First(&user, "id = ?", sessionToken.UserId)
-
-			return true, user, sessionToken, nil
-		}
-
-		return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
+		return true, nil
 	}
 
-	return false, psDatabase.User{}, psDatabase.SessionToken{}, psErrors.ErrorInitDatabase
-}
-
-func ClearSessionCookie(response http.ResponseWriter, request *http.Request) (bool, error) {
-	if psDatabase.Database != nil {
-		authenticated, _, sessionToken, _ := VerifySessionCookie(request)
-
-		if authenticated {
-			cookie := http.Cookie{
-				Name:     "SessionToken",
-				Value:    "",
-				MaxAge:   -1,
-				Secure:   false,
-				HttpOnly: true,
-				Path:     "/",
-			}
-
-			http.SetCookie(response, &cookie)
-
-			psDatabase.Database.Delete(&sessionToken)
-
-			return true, nil
-		}
-
-		return false, nil
-	}
-
-	return false, psErrors.ErrorInitDatabase
+	return false, nil
 }

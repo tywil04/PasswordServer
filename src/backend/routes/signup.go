@@ -59,17 +59,12 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 	strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
 	decodedProtectedDatabaseKey, _ := hex.DecodeString(signupParameters.ProtectedDatabaseKey)
 
-	if psDatabase.Database != nil {
-		newUser := psDatabase.User{
-			Email:                signupParameters.Email,
-			MasterHash:           strengthenedMasterHashBytes,
-			MasterHashSalt:       strengthenedMasterHashSalt,
-			ProtectedDatabaseKey: decodedProtectedDatabaseKey,
-		}
-		psDatabase.Database.Create(&newUser)
-		psUtils.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
-	} else {
-		psUtils.JsonResponse(response, http.StatusInternalServerError, SignupErrorResponse{Error: "The server was unable to create a new user."})
-		return
+	newUser := psDatabase.User{
+		Email:                signupParameters.Email,
+		MasterHash:           strengthenedMasterHashBytes,
+		MasterHashSalt:       strengthenedMasterHashSalt,
+		ProtectedDatabaseKey: decodedProtectedDatabaseKey,
 	}
+	psDatabase.Database.Create(&newUser)
+	psUtils.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
 }

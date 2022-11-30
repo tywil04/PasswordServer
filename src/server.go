@@ -47,6 +47,9 @@ func main() {
 	}
 
 	go psDatabase.DatabaseConnect()
+	if psDatabase.Database == nil {
+		panic(psErrors.ErrorLoadingDatabase)
+	}
 
 	handleRequests()
 }
