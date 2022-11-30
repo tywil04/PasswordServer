@@ -13,7 +13,7 @@ var (
 	Database *gorm.DB
 )
 
-func DatabaseConnect() {
+func DatabaseConnect() *gorm.DB {
 	var databasePath string
 	switch os.Getenv("ENVIRONMENT") {
 	case "testing":
@@ -35,4 +35,6 @@ func DatabaseConnect() {
 	Database = db
 
 	MigrateModels(db)
+
+	return Database
 }
