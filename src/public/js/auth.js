@@ -1,5 +1,6 @@
 import * as crypto from "/public/js/lib/crypto.js"
 import * as utils from "/public/js/lib/utils.js"
+import * as redirects from "/public/js/lib/redirects.js"
 
 async function signup() {
   const emailInput = document.querySelector("#email")
@@ -25,10 +26,10 @@ async function signup() {
   let success = jsonResponse.UserId !== undefined // an error response would not contain "UserId" instead it would contain "Error"
 
   if (success) {
-    utils.redirectSignin()
+    redirects.redirectSignin()
     console.log(jsonResponse.UserId)
   } else {
-    utils.refresh()
+    redirects.refresh()
   }
 }
 
@@ -50,7 +51,7 @@ async function signin() {
 
   // jsonResponse.Authenticated is only used as a quick way to see if a user is authenticated, authentication is used server-side, this value means nothing
   if (jsonResponse.Authenticated) {
-    utils.redirectHome()
+    redirects.redirectHome()
   } else {
     utils.refresh()
   }
