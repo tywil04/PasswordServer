@@ -1,4 +1,4 @@
-package redirect
+package redirects
 
 import "net/http"
 

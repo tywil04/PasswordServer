@@ -7,7 +7,7 @@ import (
 
 	psCrypto "passwordserver/src/lib/crypto"
 	psDatabase "passwordserver/src/lib/database"
-	psRedirect "passwordserver/src/lib/redirect"
+	psRedirects "passwordserver/src/lib/redirects"
 )
 
 type HomeData struct {
@@ -20,12 +20,12 @@ func Home(response http.ResponseWriter, request *http.Request, htmlDir fs.FS) {
 	authenticated, user, _, verifyError := psCrypto.VerifySessionCookie(request)
 
 	if verifyError != nil {
-		psRedirect.RedirectSignin(response, http.StatusPermanentRedirect)
+		psRedirects.RedirectSignin(response, http.StatusPermanentRedirect)
 	}
 
 	if authenticated {
 		template.Execute(response, HomeData{User: user})
 	} else {
-		psRedirect.RedirectSignin(response, http.StatusPermanentRedirect)
+		psRedirects.RedirectSignin(response, http.StatusPermanentRedirect)
 	}
 }
