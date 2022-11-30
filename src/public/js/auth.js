@@ -24,8 +24,12 @@ async function signup() {
 
   let success = jsonResponse.UserId !== undefined // an error response would not contain "UserId" instead it would contain "Error"
 
-  console.log(success) // temp stuff
-  console.log(jsonResponse)
+  if (success) {
+    utils.redirectSignin()
+    console.log(jsonResponse.UserId)
+  } else {
+    utils.refresh()
+  }
 }
 
 async function signin() {
@@ -44,7 +48,12 @@ async function signin() {
   })
   let jsonResponse = await response.json()
 
-  console.log(jsonResponse.Authenticated)
+  // jsonResponse.Authenticated is only used as a quick way to see if a user is authenticated, authentication is used server-side, this value means nothing
+  if (jsonResponse.Authenticated) {
+    utils.redirectHome()
+  } else {
+    utils.refresh()
+  }
 }
 
 // Export functions so they can be used

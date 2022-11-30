@@ -36,6 +36,7 @@ func handleRequests() {
 	// Pages
 	http.HandleFunc("/auth/signin", frontend.Route(pages.Signin))
 	http.HandleFunc("/auth/signup", frontend.Route(pages.Signup))
+	http.HandleFunc("/home", frontend.Route(pages.Home))
 
 	http.ListenAndServe(":8000", nil)
 }
@@ -46,8 +47,8 @@ func main() {
 		panic(psErrors.ErrorLoadingEnv)
 	}
 
-	go psDatabase.DatabaseConnect()
-	if psDatabase.Database == nil {
+	database := psDatabase.DatabaseConnect()
+	if database == nil {
 		panic(psErrors.ErrorLoadingDatabase)
 	}
 
