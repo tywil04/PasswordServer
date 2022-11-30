@@ -65,12 +65,12 @@ func CreateSessionCookie(response http.ResponseWriter, user psDatabase.User) err
 func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDatabase.SessionToken, error) {
 	cookie, cookieError := request.Cookie("SessionToken")
 
-	if cookieError != nil {
-		return false, psDatabase.User{}, psDatabase.SessionToken{}, cookieError
+	if cookie == nil || cookie.Value == "" {
+		return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
 	}
 
-	if cookie.Value == "" {
-		return false, psDatabase.User{}, psDatabase.SessionToken{}, nil
+	if cookieError != nil {
+		return false, psDatabase.User{}, psDatabase.SessionToken{}, cookieError
 	}
 
 	splitValue := strings.Split(cookie.Value, ",")
