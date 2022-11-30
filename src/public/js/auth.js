@@ -28,4 +28,25 @@ async function signup() {
   console.log(jsonResponse)
 }
 
-window.signup = signup // Expose function so it can be used in html
+async function signin() {
+  const emailInput = document.querySelector("#email")
+  const passwordInput = document.querySelector("#password")
+
+  let masterKey = await crypto.generateMasterKey(passwordInput.value, emailInput.value) // Derive a key via pbkdf2 from the users password and email using
+  let masterHash = utils.arrayBufferToHex(await crypto.generateMasterHash(passwordInput.value, masterKey)) // Derive bits via pbkdf2 from the masterkey and the users password (this is used for server-side auth)
+
+  let response = await fetch("/api/v1/auth/signin", {
+    method: "POST",
+    body: JSON.stringify({
+      Email: emailInput.value,
+      MasterHash: masterHash,
+    })
+  })
+  let jsonResponse = await response.json()
+
+  console.log(jsonResponse.Authenticated)
+}
+
+// Export functions so they can be used
+window.signup = signup
+window.signin = signin
