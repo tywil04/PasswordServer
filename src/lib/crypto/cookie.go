@@ -99,7 +99,8 @@ func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDataba
 	hashed := sha512.Sum512(jsonPayload.Bytes())
 
 	allSessionTokens := []psDatabase.SessionToken{}
-	psDatabase.Database.Find(&allSessionTokens)
+	psDatabase.Database.Find(&allSessionTokens, "user_id = ?", sessionToken.UserId)
+
 	for _, sessionToken := range allSessionTokens {
 		// if the session has expired remove the token. we are lax about this because any cookie which is expired doesn't isnt valid which means the code cant even process it
 		if sessionToken.Expiry.Before(time.Now()) {
@@ -109,7 +110,7 @@ func VerifySessionCookie(request *http.Request) (bool, psDatabase.User, psDataba
 
 	if rsa.VerifyPKCS1v15(&publicKey, crypto.SHA512, hashed[:], signature) == nil {
 		user := psDatabase.User{}
-		psDatabase.Database.First(&user, "id = ?", sessionToken.UserId)
+		psDatabase.Database.Limit(1).First(&user, "id = ?", sessionToken.UserId)
 
 		return true, user, sessionToken, nil
 	}
