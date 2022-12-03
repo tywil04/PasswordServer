@@ -43,8 +43,8 @@ ENVIRONMENT (production | development | testing)
 DB_PATH
 
 # Development database path
-# DEVELOPMENT_DB_PATH
+DEVELOPMENT_DB_PATH
 
 # Testing database path
-# TESTING_DB_PATH
+TESTING_DB_PATH
 ```
