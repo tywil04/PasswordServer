@@ -57,6 +57,20 @@ async function signin() {
   }
 }
 
+async function signout() {
+  let response = await fetch("/api/v1/auth/signout", {
+    method: "DELETE",
+  })
+  let jsonResponse = await response.json()
+
+  if (jsonResponse.SignedOut) {
+    redirects.redirectSignin()
+  }
+}
+
 // Export functions so they can be used
-window.signup = signup
-window.signin = signin
+window.auth = {
+  signup,
+  signin,
+  signout
+}

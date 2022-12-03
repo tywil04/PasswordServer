@@ -1,5 +1,9 @@
 {{template "base.html" .}}
 
 {{define "body" -}}
+    <script src="/public/js/auth.js" type="module"></script>
+
     Email: {{ .User.Email }}
+
+    <button onclick="auth.signout()">Signout</button>
 {{end}}
