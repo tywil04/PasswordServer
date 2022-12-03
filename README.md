@@ -1,5 +1,5 @@
 # Password Manager
-This is the code for my Computer Science A Level project. The password manager is written in go (golang) and serves as a webserver with an API and Client to interact with the API. I am using `net/http` to run the http server and I am using `html/template` for all the HTML. Both of these libraries are from the robust standard library. 
+This is the code for my Computer Science A Level project. The password manager is written in go (golang) and serves as a webserver with an API and Client to interact with the API. I am using `net/http` to run the http server and I am using `html/template` for all the HTML. Both of these libraries are from the robust standard library. The database used is sqlite3, however, gorm makes it easy to modify the code to use some other database.
 
 # Direct External Depencencies
 - `gorm` which is an awesome database orm, this project is using sqlite3 however gorm supports many more databases. 
@@ -30,4 +30,21 @@ go test src/backend/tests/...
 ### Test Frontend
 ```
 go test src/frontend/tests/...
+```
+
+### .env
+This project uses a .env file in the root of the project to store additional configurations. 
+
+```
+# The environment in which the server is running
+ENVIRONMENT (production | development | testing)
+
+# Production database path
+DB_PATH
+
+# Development database path
+# DEVELOPMENT_DB_PATH
+
+# Testing database path
+# TESTING_DB_PATH
 ```
