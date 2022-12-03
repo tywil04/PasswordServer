@@ -44,6 +44,7 @@ type SessionToken struct {
 	UserId uuid.UUID `gorm:"type:uuid"`
 	N      []byte    `sql:"index" gorm:"type:bytes"`
 	E      int       `gorm:"type:int"`
+	Expiry time.Time `gorm:"type:time"`
 }
 
 func (base *Base) BeforeCreate(tx *gorm.DB) (baseError error) {
