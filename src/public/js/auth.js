@@ -29,7 +29,7 @@ async function signup() {
     redirects.redirectSignin()
     console.log(jsonResponse.UserId)
   } else {
-    redirects.refresh()
+    redirects.refreshPage()
   }
 }
 
@@ -53,7 +53,7 @@ async function signin() {
   if (jsonResponse.Authenticated) {
     redirects.redirectHome()
   } else {
-    utils.refresh()
+    redirects.refreshPage()
   }
 }
 
