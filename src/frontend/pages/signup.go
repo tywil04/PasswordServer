@@ -11,7 +11,7 @@ type SignupData struct {
 }
 
 func Signup(response http.ResponseWriter, request *http.Request, htmlDir fs.FS) {
-	template := template.Must(template.ParseFS(htmlDir, "auth/signup.html", "base.html", "auth/authlayout.html"))
+	template := template.Must(template.ParseFS(htmlDir, "auth/signup.html", "base.html"))
 
 	template.Execute(response, SignupData{})
 }

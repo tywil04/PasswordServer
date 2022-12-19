@@ -1,23 +1,34 @@
-{{template "authlayout.html" .}}
+{{template "base.html" .}}
 
 {{define "title" -}}
-    Signup
+    Sign up
 {{end}}
 
-{{define "submitHandler" -}}
-    auth.signup()
-{{end}}
+{{define "body" -}}
+    <script src="/public/js/auth.js" type="module"></script>
 
-{{define "labels" -}} 
-    <label class="grow flex alignItemsCentre mBottom" for="email">Email</label>
-    <label class="grow flex alignItemsCentre" for="password">Password</label>
-{{end}}
+    <main class="vBox justifyContentCentre wFull hFull">
+        <div class="hBox justifyContentCentre wFull hFit">
+            <div class="vBox wFit hFit">
+                <h1 class="mTop0 mBottom">Sign up</h1>
 
-{{define "inputs" -}}
-    <input id="email" class="grow flex alignItemsCentre mBottom" name="email" type="email" autocomplete="email" autocapitalize="false" autofocus="true"/>
-    <input id="password" class="grow flex alignItemsCentre" name="password" type="password" autocomplete="new-password" autocapitalize="true"/>
-{{end}}
+                <div class="hBox wFit hFit mBottom">
+                    <div class="vBox mRight">
+                        <label class="grow flex alignItemsCentre mBottom" for="email">Email</label>
+                        <label class="grow flex alignItemsCentre" for="password">Password</label>
+                    </div>
+                    <div class="vBox">
+                        <input id="email" class="grow flex alignItemsCentre mBottom" name="email" type="email" autocomplete="email" autocapitalize="false" autofocus="true"/>
+                        <input id="password" class="grow flex alignItemsCentre" name="password" type="password" autocomplete="new-password" autocapitalize="true"/>                 
+                    </div>
+                </div>
 
-{{define "buttonLabel" -}} 
-    Create account
+                <div class="vBox wFit hFit mBottom">
+                    <a href="/auth/signin">Have an account already? Sign in here.</a>
+                </div>
+
+                <button onclick="auth.signup()" type="button">Sign up</button>
+            </div>
+        </div>
+    </main>
 {{end}}
