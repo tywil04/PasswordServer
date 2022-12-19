@@ -4,16 +4,37 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"text/template"
+
+	"passwordserver/src/backend"
 )
 
 //go:embed html/*
 var htmlFS embed.FS
 var htmlDir, _ = fs.Sub(htmlFS, "html")
 
-func Route(handler func(response http.ResponseWriter, request *http.Request, htmlDir fs.FS)) func(response http.ResponseWriter, request *http.Request) {
-	return func(response http.ResponseWriter, request *http.Request) {
+var Routes map[string]string = map[string]string{}
+
+func Route(key string, path string, handler func(response http.ResponseWriter, request *http.Request)) {
+	Routes[key] = path
+
+	http.HandleFunc(path, func(response http.ResponseWriter, request *http.Request) {
 		if request.Method == http.MethodGet {
-			handler(response, request, htmlDir)
+			handler(response, request)
 		}
-	}
+	})
+}
+
+type TemplateData struct {
+	Data           any
+	FrontendRoutes map[string]string
+	BackendRoutes  map[string]string
+}
+
+func Template(patterns ...string) *template.Template {
+	return template.Must(template.ParseFS(htmlDir, patterns...))
+}
+
+func ExecuteTemplate(response http.ResponseWriter, madeTemplate *template.Template, data any) {
+	madeTemplate.Execute(response, TemplateData{Data: data, FrontendRoutes: Routes, BackendRoutes: backend.Routes})
 }

@@ -27,15 +27,15 @@ func handleRequests() {
 	http.Handle("/", http.StripPrefix(strings.TrimRight("/public", "/"), http.FileServer(psFS.FileSystem{Fs: http.FS(publicDir)})))
 
 	// API Routes
-	http.HandleFunc("/api/v1/auth/signin", backend.Route(backend.MethodMap{Post: routes.SigninPost}))
-	http.HandleFunc("/api/v1/auth/signup", backend.Route(backend.MethodMap{Post: routes.SignupPost}))
-	http.HandleFunc("/api/v1/auth/signout", backend.Route(backend.MethodMap{Delete: routes.SignoutDelete}))
-	http.HandleFunc("/api/v1/user/protectedDatabaseKey", backend.Route(backend.MethodMap{Get: routes.ProtectedDatabaseKeyGet}))
+	backend.Route("signin", "/api/v1/auth/signin", backend.MethodMap{Post: routes.SigninPost})
+	backend.Route("signup", "/api/v1/auth/signup", backend.MethodMap{Post: routes.SignupPost})
+	backend.Route("signout", "/api/v1/auth/signout", backend.MethodMap{Delete: routes.SignoutDelete})
+	backend.Route("protectedDatabaseKey", "/api/v1/user/protectedDatabaseKey", backend.MethodMap{Get: routes.ProtectedDatabaseKeyGet})
 
 	// Pages
-	http.HandleFunc("/auth/signin", frontend.Route(pages.Signin))
-	http.HandleFunc("/auth/signup", frontend.Route(pages.Signup))
-	http.HandleFunc("/home", frontend.Route(pages.Home))
+	frontend.Route("signin", "/auth/signin", pages.Signin)
+	frontend.Route("signup", "/auth/signup", pages.Signup)
+	frontend.Route("home", "/home", pages.Home)
 
 	http.ListenAndServe(":8000", nil)
 }

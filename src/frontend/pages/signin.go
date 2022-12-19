@@ -1,17 +1,15 @@
 package pages
 
 import (
-	"io/fs"
 	"net/http"
-	"text/template"
+	"passwordserver/src/frontend"
 )
 
 type SigninData struct {
 	Error string
 }
 
-func Signin(response http.ResponseWriter, request *http.Request, htmlDir fs.FS) {
-	template := template.Must(template.ParseFS(htmlDir, "auth/signin.html", "base.html"))
-
-	template.Execute(response, SigninData{})
+func Signin(response http.ResponseWriter, request *http.Request) {
+	template := frontend.Template("auth/signin.html", "base.html")
+	frontend.ExecuteTemplate(response, template, SigninData{})
 }

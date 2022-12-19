@@ -12,6 +12,19 @@
     </head>
 
     <body>
+        <script>
+            window.frontendRoutes = {}
+            window.backendRoutes = {}
+
+            {{range $key, $value := .FrontendRoutes}}
+                window.frontendRoutes["{{$key}}"] = "{{$value}}"
+            {{end}}
+
+            {{range $key, $value := .BackendRoutes}}
+                window.backendRoutes["{{$key}}"] = "{{$value}}"
+            {{end}}
+        </script>
+
         {{block "body" .}}{{end}}
     </body>
 </html>

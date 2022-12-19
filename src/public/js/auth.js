@@ -1,8 +1,9 @@
 import * as crypto from "/public/js/lib/crypto.js"
 import * as utils from "/public/js/lib/utils.js"
-import * as redirects from "/public/js/lib/redirects.js"
 
-async function signup() {
+window.auth = {}
+
+window.auth.signup = async () => {
   const emailInput = document.querySelector("#email")
   const passwordInput = document.querySelector("#password")
 
@@ -13,7 +14,7 @@ async function signup() {
   let [iv, encryptedDatabaseKey] = await crypto.protectDatabaseKey(masterKey, databaseKey) // encrypt the key with masterkey
   let protectedDatabaseKey = utils.arrayBufferToHex(iv) + ";" + utils.arrayBufferToHex(encryptedDatabaseKey)
 
-  let response = await fetch("/api/v1/auth/signup", {
+  let response = await fetch(window.backendRoutes.signup, {
     method: "POST",
     body: JSON.stringify({
       Email: emailInput.value,
@@ -26,21 +27,21 @@ async function signup() {
   let success = jsonResponse.UserId !== undefined // an error response would not contain "UserId" instead it would contain "Error"
 
   if (success) {
-    redirects.redirectSignin()
+    window.location = window.frontendRoutes.signin
     console.log(jsonResponse.UserId)
   } else {
-    redirects.refreshPage()
+    window.location.reload()
   }
 }
 
-async function signin() {
+window.auth.signin = async () => {
   const emailInput = document.querySelector("#email")
   const passwordInput = document.querySelector("#password")
 
   let masterKey = await crypto.generateMasterKey(passwordInput.value, emailInput.value) // Derive a key via pbkdf2 from the users password and email using
   let masterHash = utils.arrayBufferToHex(await crypto.generateMasterHash(passwordInput.value, masterKey)) // Derive bits via pbkdf2 from the masterkey and the users password (this is used for server-side auth)
 
-  let response = await fetch("/api/v1/auth/signin", {
+  let response = await fetch(window.backendRoutes.signin, {
     method: "POST",
     body: JSON.stringify({
       Email: emailInput.value,
@@ -51,26 +52,19 @@ async function signin() {
 
   // jsonResponse.Authenticated is only used as a quick way to see if a user is authenticated, authentication is used server-side, this value means nothing
   if (jsonResponse.Authenticated) {
-    redirects.redirectHome()
+    window.location = window.frontendRoutes.home
   } else {
-    redirects.refreshPage()
+    window.location.reload()
   }
 }
 
-async function signout() {
-  let response = await fetch("/api/v1/auth/signout", {
+window.auth.signout = async () => {
+  let response = await fetch(window.backendRoutes.signout, {
     method: "DELETE",
   })
   let jsonResponse = await response.json()
 
   if (jsonResponse.SignedOut) {
-    redirects.redirectSignin()
+    window.location = window.frontendRoutes.signin
   }
-}
-
-// Export functions so they can be used
-window.auth = {
-  signup,
-  signin,
-  signout
 }
