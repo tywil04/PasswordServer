@@ -21,15 +21,8 @@ go run src/server.go
 
 # Testing
 Due to go's fantastic testing library from the standard library, you can run go tests very easily.
-
-### Test Backend
 ```
-go test src/backend/tests/...
-```
-
-### Test Frontend
-```
-go test src/frontend/tests/...
+go test tests
 ```
 
 ### .env
