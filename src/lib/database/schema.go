@@ -16,12 +16,13 @@ type Base struct {
 
 type User struct {
 	Base
-	Email                string         `gorm:"type:string"`
-	MasterHash           []byte         `gorm:"type:bytes"`
-	MasterHashSalt       []byte         `gorm:"type:bytes"`
-	ProtectedDatabaseKey []byte         `gorm:"type:bytes"`
-	SecureEntries        []SecureEntry  `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	SessionTokens        []SessionToken `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Email                  string         `gorm:"type:string"`
+	MasterHash             []byte         `gorm:"type:bytes"`
+	MasterHashSalt         []byte         `gorm:"type:bytes"`
+	ProtectedDatabaseKey   []byte         `gorm:"type:bytes"`
+	ProtectedDatabaseKeyIV []byte         `gorm:"type:bytes"`
+	SecureEntries          []SecureEntry  `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	SessionTokens          []SessionToken `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type SecureEntry struct {

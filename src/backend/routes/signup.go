@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	psCrypto "passwordserver/src/lib/crypto"
 	psDatabase "passwordserver/src/lib/database"
@@ -57,13 +58,20 @@ func SignupPost(response http.ResponseWriter, request *http.Request) {
 
 	strengthenedMasterHashSalt := psCrypto.RandomBytes(16)
 	strengthenedMasterHashBytes := psCrypto.StrengthenMasterHash(MasterHashBytes, strengthenedMasterHashSalt)
-	decodedProtectedDatabaseKey, _ := hex.DecodeString(signupParameters.ProtectedDatabaseKey)
+
+	protectedDatabaseParts := strings.Split(signupParameters.ProtectedDatabaseKey, ";")
+	protectedDatabaseKey := protectedDatabaseParts[1]
+	protectedDatabaseKeyIV := protectedDatabaseParts[0]
+
+	decodedProtectedDatabaseKey, _ := hex.DecodeString(protectedDatabaseKey)
+	decodedProtectedDatabaseKeyIV, _ := hex.DecodeString(protectedDatabaseKeyIV)
 
 	newUser := psDatabase.User{
-		Email:                signupParameters.Email,
-		MasterHash:           strengthenedMasterHashBytes,
-		MasterHashSalt:       strengthenedMasterHashSalt,
-		ProtectedDatabaseKey: decodedProtectedDatabaseKey,
+		Email:                  signupParameters.Email,
+		MasterHash:             strengthenedMasterHashBytes,
+		MasterHashSalt:         strengthenedMasterHashSalt,
+		ProtectedDatabaseKey:   decodedProtectedDatabaseKey,
+		ProtectedDatabaseKeyIV: decodedProtectedDatabaseKeyIV,
 	}
 	psDatabase.Database.Create(&newUser)
 	psUtils.JsonResponse(response, http.StatusOK, SignupResponse{UserId: newUser.Id})
