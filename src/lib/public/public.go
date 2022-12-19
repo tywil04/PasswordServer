@@ -18,7 +18,9 @@ func CalculatePublicJSIntegrity(publicDir fs.FS) {
 
 		if extension == "js" && !directory.IsDir() {
 			buffer := make([]byte, 30*1024)
-			sha384 := sha512.New384()
+
+			hashAlgo := "sha384"
+			hash := sha512.New384()
 
 			file, _ := publicDir.Open(path)
 			defer file.Close()
@@ -26,7 +28,7 @@ func CalculatePublicJSIntegrity(publicDir fs.FS) {
 			for {
 				n, err := file.Read(buffer)
 				if n > 0 {
-					sha384.Write(buffer[:n])
+					hash.Write(buffer[:n])
 				}
 
 				if err == io.EOF {
@@ -34,12 +36,12 @@ func CalculatePublicJSIntegrity(publicDir fs.FS) {
 				}
 			}
 
-			sum := sha384.Sum(nil)
+			sum := hash.Sum(nil)
 			resultBuffer := bytes.NewBuffer([]byte{})
 			base64.NewEncoder(base64.StdEncoding, resultBuffer).Write(sum)
 
 			key := strings.Join(parts[:len(parts)-1], ".")
-			value := "sha384-" + resultBuffer.String()
+			value := hashAlgo + "-" + resultBuffer.String()
 
 			Integrity[key] = value
 		}
