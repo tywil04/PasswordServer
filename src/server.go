@@ -14,6 +14,7 @@ import (
 	psDatabase "passwordserver/src/lib/database"
 	psErrors "passwordserver/src/lib/errors"
 	psFS "passwordserver/src/lib/fs"
+	psPublic "passwordserver/src/lib/public"
 
 	"github.com/joho/godotenv"
 )
@@ -50,6 +51,8 @@ func main() {
 	if database == nil {
 		panic(psErrors.ErrorLoadingDatabase)
 	}
+
+	psPublic.CalculatePublicJSIntegrity(publicDir)
 
 	handleRequests()
 }

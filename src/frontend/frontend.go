@@ -7,6 +7,8 @@ import (
 	"text/template"
 
 	"passwordserver/src/backend"
+
+	psPublic "passwordserver/src/lib/public"
 )
 
 //go:embed html/*
@@ -26,9 +28,10 @@ func Route(key string, path string, handler func(response http.ResponseWriter, r
 }
 
 type TemplateData struct {
-	Data           any
-	FrontendRoutes map[string]string
-	BackendRoutes  map[string]string
+	Data            any
+	PublicIntegrity map[string]string
+	FrontendRoutes  map[string]string
+	BackendRoutes   map[string]string
 }
 
 func Template(patterns ...string) *template.Template {
@@ -36,5 +39,5 @@ func Template(patterns ...string) *template.Template {
 }
 
 func ExecuteTemplate(response http.ResponseWriter, madeTemplate *template.Template, data any) {
-	madeTemplate.Execute(response, TemplateData{Data: data, FrontendRoutes: Routes, BackendRoutes: backend.Routes})
+	madeTemplate.Execute(response, TemplateData{Data: data, PublicIntegrity: psPublic.Integrity, FrontendRoutes: Routes, BackendRoutes: backend.Routes})
 }

@@ -5,7 +5,7 @@
 {{end}}
 
 {{define "body" -}}
-    <script src="/public/js/auth.js" type="module"></script>
+    <script integrity="{{ .PublicIntegrity.auth }}" src="/public/js/auth.js" type="module"></script>
 
     <main class="vBox justifyContentCentre wFull hFull">
         <div class="hBox justifyContentCentre wFull hFit">
