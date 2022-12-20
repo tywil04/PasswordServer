@@ -10,6 +10,6 @@ type SigninData struct {
 }
 
 func Signin(response http.ResponseWriter, request *http.Request) {
-	template := frontend.Template("auth/signin.html", "base.html")
+	template := frontend.Template("signin.html", "base.html")
 	frontend.ExecuteTemplate(response, template, SigninData{})
 }

@@ -10,6 +10,6 @@ type SignupData struct {
 }
 
 func Signup(response http.ResponseWriter, request *http.Request) {
-	template := frontend.Template("auth/signup.html", "base.html")
+	template := frontend.Template("signup.html", "base.html")
 	frontend.ExecuteTemplate(response, template, SignupData{})
 }
