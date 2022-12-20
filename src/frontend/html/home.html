@@ -1,7 +1,7 @@
 {{template "base.html" .}}
 
 {{define "body" -}}
-    <script integrity="{{ authPublicIntegrity }}" src="{{ .FrontendRoutesJS.auth }}" type="module"></script>
+    <script integrity="{{ authIntegrity }}" src="{{ .FrontendRoutesJS.auth }}" type="module"></script>
 
     Email: {{ .Data.User.Email }}
 

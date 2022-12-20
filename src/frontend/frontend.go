@@ -41,6 +41,7 @@ func Route(key string, path string, handler func(response http.ResponseWriter, r
 
 func RouteCSS(key string, path string, filePath string) {
 	RoutesCSS[key] = path
+
 	file, _ := fs.ReadFile(cssDir, filePath)
 
 	http.HandleFunc(path, func(response http.ResponseWriter, request *http.Request) {
@@ -54,26 +55,27 @@ var Integrity template.FuncMap = template.FuncMap{}
 
 func RouteJS(key string, path string, filePath string) {
 	RoutesJS[key] = path
+
 	file, _ := fs.ReadFile(jsDir, filePath)
+	fileBuffer := bytes.NewBuffer(file)
 
 	http.HandleFunc(path, func(response http.ResponseWriter, request *http.Request) {
 		response.Header().Add("Content-type", "text/javascript")
-		template.Must(template.New("").Parse(bytes.NewBuffer(file).String())).Execute(response, TemplateData{FrontendRoutes: Routes, FrontendRoutesJS: RoutesJS, FrontendRoutesCSS: RoutesCSS, BackendRoutes: backend.Routes})
+		template.Must(template.New("").Parse(fileBuffer.String())).Execute(response, TemplateData{FrontendRoutes: Routes, FrontendRoutesJS: RoutesJS, FrontendRoutesCSS: RoutesCSS, BackendRoutes: backend.Routes})
 	})
 
-	key += "PublicIntegrity"
+	key += "Integrity"
 
 	Integrity[key] = func() string {
 		if CachedIntegrity[key] == "" {
 			hashAlgo := "sha384"
 			hash := sha512.New384()
 
-			contents, _ := fs.ReadFile(jsDir, filePath)
 			parsedContents := bytes.NewBuffer([]byte{})
-			template.Must(template.New("").Parse(bytes.NewBuffer(contents).String())).Execute(parsedContents, TemplateData{FrontendRoutes: Routes, FrontendRoutesJS: RoutesJS, FrontendRoutesCSS: RoutesCSS, BackendRoutes: backend.Routes})
+			template.Must(template.New("").Parse(fileBuffer.String())).Execute(parsedContents, TemplateData{FrontendRoutes: Routes, FrontendRoutesJS: RoutesJS, FrontendRoutesCSS: RoutesCSS, BackendRoutes: backend.Routes})
 			hash.Write(parsedContents.Bytes())
-
 			sum := hash.Sum(nil)
+
 			resultBuffer := bytes.NewBuffer([]byte{})
 			base64.NewEncoder(base64.StdEncoding, resultBuffer).Write(sum)
 			value := hashAlgo + "-" + resultBuffer.String()
