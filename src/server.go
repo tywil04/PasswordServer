@@ -52,7 +52,7 @@ func main() {
 		panic(psErrors.ErrorLoadingDatabase)
 	}
 
-	psPublic.CalculatePublicJSIntegrity(publicDir)
+	psPublic.GenerateIntegrityMap(publicDir)
 
 	handleRequests()
 }

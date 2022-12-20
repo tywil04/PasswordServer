@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"strings"
 	"text/template"
 
 	"passwordserver/src/backend"
@@ -28,16 +29,18 @@ func Route(key string, path string, handler func(response http.ResponseWriter, r
 }
 
 type TemplateData struct {
-	Data            any
-	PublicIntegrity map[string]string
-	FrontendRoutes  map[string]string
-	BackendRoutes   map[string]string
+	Data           any
+	FrontendRoutes map[string]string
+	BackendRoutes  map[string]string
 }
 
 func Template(patterns ...string) *template.Template {
-	return template.Must(template.ParseFS(htmlDir, patterns...))
+	parts := strings.Split(patterns[0], "/")
+	templateName := parts[len(parts)-1]
+
+	return template.Must(template.New(templateName).Funcs(psPublic.Integrity).ParseFS(htmlDir, patterns...))
 }
 
 func ExecuteTemplate(response http.ResponseWriter, madeTemplate *template.Template, data any) {
-	madeTemplate.Execute(response, TemplateData{Data: data, PublicIntegrity: psPublic.Integrity, FrontendRoutes: Routes, BackendRoutes: backend.Routes})
+	madeTemplate.Execute(response, TemplateData{Data: data, FrontendRoutes: Routes, BackendRoutes: backend.Routes})
 }

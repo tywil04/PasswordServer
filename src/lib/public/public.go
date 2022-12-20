@@ -7,45 +7,53 @@ import (
 	"io"
 	"io/fs"
 	"strings"
+	"text/template"
 )
 
-var Integrity map[string]string = map[string]string{}
+var CachedIntegrity map[string]string = map[string]string{}
+var Integrity template.FuncMap = template.FuncMap{}
 
-func CalculatePublicJSIntegrity(publicDir fs.FS) {
+func GenerateIntegrityMap(publicDir fs.FS) {
 	fs.WalkDir(publicDir, ".", func(path string, directory fs.DirEntry, err error) error {
 		parts := strings.Split(directory.Name(), ".")
 		extension := parts[len(parts)-1]
 
 		if extension == "js" && !directory.IsDir() {
-			buffer := make([]byte, 30*1024)
+			key := strings.Join(parts[:len(parts)-1], ".") + "PublicIntegrity"
 
-			hashAlgo := "sha384"
-			hash := sha512.New384()
+			Integrity[key] = func() string {
+				if CachedIntegrity[key] == "" {
+					hashAlgo := "sha384"
+					hash := sha512.New384()
+					buffer := make([]byte, 30*1024)
 
-			file, _ := publicDir.Open(path)
-			defer file.Close()
+					file, _ := publicDir.Open(path)
+					defer file.Close()
 
-			for {
-				n, err := file.Read(buffer)
-				if n > 0 {
-					hash.Write(buffer[:n])
-				}
+					for {
+						n, err := file.Read(buffer)
+						if n > 0 {
+							hash.Write(buffer[:n])
+						}
 
-				if err == io.EOF {
-					break
+						if err == io.EOF {
+							break
+						}
+					}
+
+					sum := hash.Sum(nil)
+					resultBuffer := bytes.NewBuffer([]byte{})
+					base64.NewEncoder(base64.StdEncoding, resultBuffer).Write(sum)
+					value := hashAlgo + "-" + resultBuffer.String()
+
+					CachedIntegrity[key] = value
+
+					return value
+				} else {
+					return CachedIntegrity[key]
 				}
 			}
-
-			sum := hash.Sum(nil)
-			resultBuffer := bytes.NewBuffer([]byte{})
-			base64.NewEncoder(base64.StdEncoding, resultBuffer).Write(sum)
-
-			key := strings.Join(parts[:len(parts)-1], ".")
-			value := hashAlgo + "-" + resultBuffer.String()
-
-			Integrity[key] = value
 		}
-
 		return nil
 	})
 }
