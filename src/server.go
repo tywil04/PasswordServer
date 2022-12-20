@@ -14,7 +14,6 @@ import (
 	psDatabase "passwordserver/src/lib/database"
 	psErrors "passwordserver/src/lib/errors"
 	psFS "passwordserver/src/lib/fs"
-	psPublic "passwordserver/src/lib/public"
 
 	"github.com/joho/godotenv"
 )
@@ -38,6 +37,14 @@ func handleRequests() {
 	frontend.Route("signup", "/auth/signup", pages.Signup)
 	frontend.Route("home", "/home", pages.Home)
 
+	// JS
+	frontend.RouteJS("auth", "/frontend/js/auth.js", "auth.js")
+	frontend.RouteJS("crypto", "/frontend/js/crypto.js", "lib/crypto.js")
+	frontend.RouteJS("utils", "/frontend/js/utils.js", "lib/utils.js")
+
+	// CSS
+	frontend.RouteCSS("styles", "/frontend/css/styles.css", "styles.css")
+
 	http.ListenAndServe(":8000", nil)
 }
 
@@ -51,8 +58,6 @@ func main() {
 	if database == nil {
 		panic(psErrors.ErrorLoadingDatabase)
 	}
-
-	psPublic.GenerateIntegrityMap(publicDir)
 
 	handleRequests()
 }

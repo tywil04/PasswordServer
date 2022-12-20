@@ -1,4 +1,4 @@
-import * as utils from "/public/js/lib/utils.js"
+import * as utils from "{{ .FrontendRoutesJS.utils }}"
 
 export async function importRawKey(key, extractable=false, algorithm="PBKDF2", usages=["deriveKey", "deriveBits"]) {
   return await crypto.subtle.importKey(
