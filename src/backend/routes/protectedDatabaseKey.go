@@ -21,7 +21,8 @@ func ProtectedDatabaseKeyGet(response http.ResponseWriter, request *http.Request
 
 	if authenticated {
 		protectedDatabaseKey := hex.EncodeToString(user.ProtectedDatabaseKey)
-		psUtils.JsonResponse(response, http.StatusOK, ProtectedDatabaseKeyResponse{ProtectedDatabaseKey: protectedDatabaseKey})
+		protectedDatabaseKeyIV := hex.EncodeToString(user.ProtectedDatabaseKeyIV)
+		psUtils.JsonResponse(response, http.StatusOK, ProtectedDatabaseKeyResponse{ProtectedDatabaseKey: protectedDatabaseKeyIV + ";" + protectedDatabaseKey})
 		return
 	} else {
 		psUtils.JsonResponse(response, http.StatusNetworkAuthenticationRequired, ProtectedDatabaseKeyErrorResponse{Error: "You are not authenticated."})
